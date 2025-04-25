@@ -1,0 +1,171 @@
+﻿@{
+    ViewBag.Title = "Productos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row m-4">
+    <div class="col-sm-12">
+        <div class="card">
+            <div class="card-header">
+                <h4>Gestión de Productos</h4>
+            </div>
+            <div class="card-body">
+                <table class="display responsive nowrap" id="myTable" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Precio</th>
+                            <th>Cantidad</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="FormModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Producto</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtIdProducto" />
+                <div class="form-group">
+                    <label for="txtNombre">Nombre:</label>
+                    <input type="text" class="form-control" id="txtNombre" />
+                </div>
+                <div class="form-group">
+                    <label for="txtDescripcion">Descripción:</label>
+                    <input type="text" class="form-control" id="txtDescripcion" />
+                </div>
+                <div class="form-group">
+                    <label for="txtPrecio">Precio:</label>
+                    <input type="number" class="form-control" id="txtPrecio" step="0.01" />
+                </div>
+                <div class="form-group">
+                    <label for="txtCantidad">Cantidad:</label>
+                    <input type="number" class="form-control" id="txtCantidad" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="Guardar()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+    var tabla_producto;
+    $(document).ready(function () {
+        tabla_producto = $('#myTable').DataTable({
+            "ajax": {
+                "url": "@Url.Action("Listar", "Producto")",
+                "type": "GET",
+                "datatype": "json"
+            },
+            "columns": [
+                { "data": "nombre" },
+                { "data": "descripcion" },
+                { "data": "precio" },
+                { "data": "cantidad" },
+                {
+                    "data": "id", "render": function (data) {
+                        return "<button class='btn btn-primary btn-sm' onclick='abrirModal(" + data + ")'><i class='fas fa-pen'></i></button>" +
+                            "<button class='btn btn-danger btn-sm ml-2' onclick='Eliminar(" + data + ")'><i class='fa fa-trash'></i></button>";
+                    },
+                    "orderable": false,
+                    "searchable": false,
+                    "width": "150px"
+                }
+            ],
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    text: 'Agregar Nuevo',
+                    attr: { class: 'btn btn-success btn-sm' },
+                    action: function () {
+                        abrirModal(0);
+                    }
+                }
+            ],
+            "language": {
+                "url": "@Url.Content("~/Content/datatable/idioma/datatable.es-ES.json")"
+            }
+        });
+    });
+
+    function abrirModal(idProducto) {
+        $("#txtIdProducto").val(idProducto);
+        if (idProducto !== 0) {
+            $.ajax({
+                url: "@Url.Action("Obtener", "Producto")" + "?id=" + idProducto,
+                type: "GET",
+                success: function (data) {
+                    if (data) {
+                        $("#txtNombre").val(data.nombre);
+                        $("#txtDescripcion").val(data.descripcion);
+                        $("#txtPrecio").val(data.precio);
+                        $("#txtCantidad").val(data.cantidad);
+                    }
+                }
+            });
+        } else {
+            $("#txtNombre").val("");
+            $("#txtDescripcion").val("");
+            $("#txtPrecio").val("");
+            $("#txtCantidad").val("");
+        }
+
+        $('#FormModal').modal('show');
+    }
+
+    function Guardar() {
+        var data = {
+            id: parseInt($("#txtIdProducto").val()),
+            nombre: $("#txtNombre").val(),
+            descripcion: $("#txtDescripcion").val(),
+            precio: parseFloat($("#txtPrecio").val()),
+            cantidad: parseInt($("#txtCantidad").val())
+        };
+
+        $.ajax({
+            url: "@Url.Action("Guardar", "Producto")",
+            type: "POST",
+            data: JSON.stringify({ producto: data }),
+            contentType: "application/json; charset=utf-8",
+            success: function (res) {
+                if (res.resultado) {
+                    tabla_producto.ajax.reload();
+                    $('#FormModal').modal('hide');
+                } else {
+                    alert("No se pudo guardar");
+                }
+            }
+        });
+    }
+
+    function Eliminar(idProducto) {
+        if (confirm("¿Desea eliminar este producto?")) {
+            $.ajax({
+                url: "@Url.Action("Eliminar", "Producto")" + "?id=" + idProducto,
+                type: "GET",
+                success: function (res) {
+                    if (res.resultado) {
+                        tabla_producto.ajax.reload();
+                    }
+                }
+            });
+        }
+    }
+    </script>
+}
