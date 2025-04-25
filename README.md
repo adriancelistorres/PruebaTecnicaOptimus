@@ -1,4 +1,4 @@
-# Proyecto CRUD de Productos + Tarea Automática (.NET MVC clásico)
+# Proyecto CRUD de Productos + Tarea Automática (.NET MVC clásico + JQuery) 
 
 Este proyecto permite realizar operaciones CRUD sobre una tabla de productos utilizando ASP.NET MVC clásico (.NET Framework) con Entity Framework. Además, incluye una tarea automática en segundo plano que se ejecuta cada 10 segundos.
 
