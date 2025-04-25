@@ -77,7 +77,7 @@ La vista utiliza:
 Ubicación: `App_Start/TareaAutomatica.cs`
 
 Funcionalidad:
-- Se ejecuta cada 60 segundos desde `Application_Start`
+- Se ejecuta cada 10 segundos desde `Application_Start`
 - Simula el envío de un correo escribiendo en `correo_log.txt`
 - Copia `archivo.txt` desde `App_Data` con un nuevo nombre
 
